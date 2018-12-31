@@ -78,6 +78,39 @@
           return hashParams;
         }
 
+        /**
+          * Main function of this project. Returns 10,000 songs that should
+          * go into a new playlist, sampled via the users songs JOINed with
+          * all songs from playlists the user follows
+          * @return Array[SongIDs]
+          */ 
+        function generatePlaylist(access_token) {
+          var songsSet = new Set([]);
+          
+          function genPlaylistHelper(loc) {
+            $.ajax({
+                url: loc,
+                headers: {
+                  'Authorization': 'Bearer ' + access_token
+                },
+                success: function(response) {
+                  console.log("Playlists...");
+                  console.log(response)
+
+                  // Get songs from each playlist...
+
+                  // Check for more playlists...
+                  if (response.next !== null) {
+                    genPlaylistHelper(response.next); 
+                  }
+                }
+            });
+          }
+
+         
+          genPlaylistHelper('https://api.spotify.com/v1/me/playlists')
+        }
+
         var userProfileSource = document.getElementById('user-profile-template').innerHTML,
             userProfileTemplate = Handlebars.compile(userProfileSource),
             userProfilePlaceholder = document.getElementById('user-profile');
@@ -114,6 +147,8 @@
                   $('#loggedin').show();
                 }
             });
+            
+            generatePlaylist(access_token); 
           } else {
               // render initial screen
               $('#login').show();
