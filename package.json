@@ -1,7 +1,7 @@
 {
   "author": "Josiah Bruner",
   "name": "spotify-playlist-sampler",
-  "description": "Creates a playlist sampled from a chosen set of playlists you follow.",
+  "description": "Creates a playlist sampled from all songs in your library AND in playlists you follow.",
   "version": "0.0.2",
   "dependencies": {
     "cookie-parser": "^1.4.3",
