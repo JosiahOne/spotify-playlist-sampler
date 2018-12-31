@@ -28,6 +28,10 @@
         <div id="oauth">
         </div>
         <button class="btn btn-default" id="obtain-new-token">Obtain new token using the refresh token</button>
+        <br>Number of Songs Discovered:
+        <div id="numSongsFound">
+        </div>
+        <button id="composeButton"> Compose playlist using discovered songs</button>
       </div>
     </div>
 
@@ -54,7 +58,7 @@
     <script id="oauth-template" type="text/x-handlebars-template">
       <h2>oAuth info</h2>
       <dl class="dl-horizontal">
-        <dt>Access token</dt><dd class="text-overflow">{{access_token}}</dd>
+        <dt>Access token</dt><dd class="text-overflow" id="access_token_ele">{{access_token}}</dd>
         <dt>Refresh token</dt><dd class="text-overflow">{{refresh_token}}</dd>
       </dl>
     </script>
@@ -78,6 +82,63 @@
           return hashParams;
         }
 
+        function composePlaylist(access_token, user_id) {
+          
+          // Note: Only 100 songs can be added at a time.
+          function addSongs(playlistID) {
+            var chosenSongs = new Set([])
+            var songsToAdd = []
+            var songsArray = [...songsSet]
+
+            for (var i = 0; i < 100; i++) {
+              // Randomly pick a value between 0 and sizeof set - 1
+              var randomPos = Math.floor(Math.random() * songsSet.size);
+
+              while (chosenSongs.has(randomPos)) {
+                randomPos = Math.floor(Math.random() * songsSet.size);
+              }
+
+              chosenSongs.add(randomPos);
+              songsToAdd.push("spotify:track:" + songsArray[randomPos]); 
+            } 
+
+            // Post to new playlist...
+            $.ajax({
+                url: "https://api.spotify.com/v1/playlists/" + playlistID + "/tracks",
+                type: "POST",
+                data: JSON.stringify({
+                  "uris": songsToAdd 
+                }),
+                headers: {
+                  'Authorization': 'Bearer ' + access_token,
+                  'Content-Type': "application/json"
+                },
+                success: function(response) {
+                  alert("Playlist created and songs added!")
+                }
+            });
+              
+          }
+        
+          $.ajax({
+              url: "https://api.spotify.com/v1/users/" + user_id + "/playlists",
+              type: "POST",
+              data: JSON.stringify({
+                name: "Composition Playlist"
+              }),
+              headers: {
+                'Authorization': 'Bearer ' + access_token
+              },
+              success: function(response) {
+                // Add songs to playlist
+                var newPlaylistId = response.id;
+                addSongs(newPlaylistId);
+              }
+          });
+          
+
+        }
+
         /**
           * Main function of this project. Returns 10,000 songs that should
           * go into a new playlist, sampled via the users songs JOINed with
@@ -86,7 +147,7 @@
           */ 
         function generatePlaylist(access_token) {
           songsSet = new Set([]);
-          
+ 
           function requestTracks(loc, storeSet) {
             $.ajax({
                 url: loc,
@@ -101,6 +162,9 @@
                   for (item of response.items) {
                     storeSet.add(item.track.id)
                   }
+          
+                  // Update songs counter on front-end...
+                  document.getElementById("numSongsFound").innerHTML = storeSet.size
 
                   // Check if there are other tracks
                   if (response.next !== null) {
@@ -152,6 +216,8 @@
             refresh_token = params.refresh_token,
             error = params.error;
 
+        var user_id = null;
+
         if (error) {
           alert('There was an error during the authentication');
         } else {
@@ -169,6 +235,8 @@
                 },
                 success: function(response) {
                   userProfilePlaceholder.innerHTML = userProfileTemplate(response);
+
+                  user_id = response.id;
 
                   $('#login').hide();
                   $('#loggedin').show();
@@ -196,6 +264,12 @@
               });
             });
           }, false);
+
+
+          document.getElementById("composeButton").addEventListener('click', function() {
+            composePlaylist(access_token, user_id )
+          });
+
         }
       })();
     </script>
