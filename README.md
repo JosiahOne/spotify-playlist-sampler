@@ -1,2 +1,2 @@
 # spotify-playlist-sampler
-Creates a playlist sampled from a chosen set of playlists you follow.
+Creates a playlist sampled from all songs in your library AND in playlists you follow.
