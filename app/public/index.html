@@ -85,8 +85,32 @@
           * @return Array[SongIDs]
           */ 
         function generatePlaylist(access_token) {
-          var songsSet = new Set([]);
+          songsSet = new Set([]);
           
+          function requestTracks(loc, storeSet) {
+            $.ajax({
+                url: loc,
+                headers: {
+                  'Authorization': 'Bearer ' + access_token
+                },
+                success: function(response) {
+                  console.log("Tracks...");
+                  console.log(response)
+                  
+                  // Add tracks to the set
+                  for (item of response.items) {
+                    storeSet.add(item.track.id)
+                  }
+
+                  // Check if there are other tracks
+                  if (response.next !== null) {
+                    requestTracks(response.next, storeSet);
+                  }
+                }
+            });
+
+          }
+
           function genPlaylistHelper(loc) {
             $.ajax({
                 url: loc,
@@ -98,7 +122,10 @@
                   console.log(response)
 
                   // Get songs from each playlist...
-
+                  for (var item of response.items) {
+                    // Request the tracks and put them in songsSet
+                    requestTracks(item.tracks.href, songsSet);    
+                  }
                   // Check for more playlists...
                   if (response.next !== null) {
                     genPlaylistHelper(response.next); 
