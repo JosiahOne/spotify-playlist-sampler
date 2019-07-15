@@ -68,6 +68,21 @@
     <script>
       (function() {
 
+        function refreshToken() {
+          $.ajax({
+            url: '/refresh_token',
+            data: {
+              'refresh_token': refresh_token
+            }
+          }).done(function(data) {
+            access_token = data.access_token;
+            oauthPlaceholder.innerHTML = oauthTemplate({
+              access_token: access_token,
+              refresh_token: refresh_token
+            });
+          });
+        }
+
         /**
          * Obtains parameters from the hash of the URL
          * @return Object
@@ -83,7 +98,7 @@
         }
 
         function composePlaylist(access_token, user_id) {
-          
+
           // Note: Only 100 songs can be added at a time.
           function addSongs(playlistID) {
             var chosenSongs = new Set([])
@@ -99,15 +114,15 @@
               }
 
               chosenSongs.add(randomPos);
-              songsToAdd.push("spotify:track:" + songsArray[randomPos]); 
-            } 
+              songsToAdd.push("spotify:track:" + songsArray[randomPos]);
+            }
 
             // Post to new playlist...
             $.ajax({
                 url: "https://api.spotify.com/v1/playlists/" + playlistID + "/tracks",
                 type: "POST",
                 data: JSON.stringify({
-                  "uris": songsToAdd 
+                  "uris": songsToAdd
                 }),
                 headers: {
                   'Authorization': 'Bearer ' + access_token,
@@ -117,9 +132,9 @@
                   alert("Playlist created and songs added!")
                 }
             });
-              
+
           }
-        
+
           $.ajax({
               url: "https://api.spotify.com/v1/users/" + user_id + "/playlists",
               type: "POST",
@@ -135,7 +150,7 @@
                 addSongs(newPlaylistId);
               }
           });
-          
+
 
         }
 
@@ -144,10 +159,10 @@
           * go into a new playlist, sampled via the users songs JOINed with
           * all songs from playlists the user follows
           * @return Array[SongIDs]
-          */ 
+          */
         function generatePlaylist(access_token) {
           songsSet = new Set([]);
- 
+
           function requestTracks(loc, storeSet) {
             $.ajax({
                 url: loc,
@@ -157,12 +172,12 @@
                 success: function(response) {
                   console.log("Tracks...");
                   console.log(response)
-                  
+
                   // Add tracks to the set
                   for (item of response.items) {
                     storeSet.add(item.track.id)
                   }
-          
+
                   // Update songs counter on front-end...
                   document.getElementById("numSongsFound").innerHTML = storeSet.size
 
@@ -188,17 +203,17 @@
                   // Get songs from each playlist...
                   for (var item of response.items) {
                     // Request the tracks and put them in songsSet
-                    requestTracks(item.tracks.href, songsSet);    
+                    requestTracks(item.tracks.href, songsSet);
                   }
                   // Check for more playlists...
                   if (response.next !== null) {
-                    genPlaylistHelper(response.next); 
+                    genPlaylistHelper(response.next);
                   }
                 }
             });
           }
 
-         
+
           genPlaylistHelper('https://api.spotify.com/v1/me/playlists')
         }
 
@@ -242,28 +257,15 @@
                   $('#loggedin').show();
                 }
             });
-            
-            generatePlaylist(access_token); 
+
+            generatePlaylist(access_token);
           } else {
               // render initial screen
               $('#login').show();
               $('#loggedin').hide();
           }
 
-          document.getElementById('obtain-new-token').addEventListener('click', function() {
-            $.ajax({
-              url: '/refresh_token',
-              data: {
-                'refresh_token': refresh_token
-              }
-            }).done(function(data) {
-              access_token = data.access_token;
-              oauthPlaceholder.innerHTML = oauthTemplate({
-                access_token: access_token,
-                refresh_token: refresh_token
-              });
-            });
-          }, false);
+          document.getElementById('obtain-new-token').addEventListener('click', refreshToken, false);
 
 
           document.getElementById("composeButton").addEventListener('click', function() {
@@ -275,4 +277,3 @@
     </script>
   </body>
 </html>
-
