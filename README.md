@@ -1,4 +1,6 @@
 # spotify-playlist-sampler
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/JosiahOne/spotify-playlist-sampler.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/JosiahOne/spotify-playlist-sampler/alerts/)
+
 Creates a playlist sampled from all songs in your library AND in playlists you follow.
 
 ## Installation and Running
