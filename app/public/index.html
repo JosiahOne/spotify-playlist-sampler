@@ -150,8 +150,6 @@
                 addSongs(newPlaylistId);
               }
           });
-
-
         }
 
         /**
@@ -207,7 +205,11 @@
                   }
                   // Check for more playlists...
                   if (response.next !== null) {
-                    genPlaylistHelper(response.next);
+                    // Spotify imposes a rate limit on API calls. Delay querying the
+                    // next playlist slightly.
+                    setTimeout(function() {
+                      genPlaylistHelper(response.next);
+                    }, 2000);
                   }
                 }
             });
