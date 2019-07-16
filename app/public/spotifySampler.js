@@ -104,7 +104,7 @@
             console.log(response)
 
             // Add tracks to the set
-            for (item of response.items) {
+            for (let item of response.items) {
               storeSet.add(item.track.id)
             }
 
