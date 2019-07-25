@@ -147,8 +147,36 @@
       });
     }
 
+    function genLibraryHelper(loc) {
+      $.ajax({
+          url: loc,
+          headers: {
+            'Authorization': 'Bearer ' + access_token
+          },
+          success: function(response) {
+            console.log("Tracks...");
+            console.log(response)
+            
+            // Get songs from library...
+            for (var item of response.items) {
+              var trackID = item.track.id;
+              songsSet.add(trackID);
+            }
+
+            // Check for more songs...
+            if (response.next !== null) {
+              // Spotify imposes a rate limit on API calls. Delay querying the
+              // next playlist slightly.
+              setTimeout(function() {
+                genLibraryHelper(response.next);
+              }, 2000);
+            }
+          }
+      });
+    }
 
     genPlaylistHelper('https://api.spotify.com/v1/me/playlists')
+    genLibraryHelper('https://api.spotify.com/v1/me/tracks')
   }
 
   var userProfileSource = document.getElementById('user-profile-template').innerHTML,
