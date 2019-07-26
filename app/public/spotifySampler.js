@@ -104,6 +104,13 @@
           headers: {
             'Authorization': 'Bearer ' + access_token
           },
+          statusCode: {
+            429: function(response) {
+              console.log("Throttle in requestTracks!")
+
+              requestTracks(globalLastRequestTracksRequest, storeSet)
+            }
+          },
           success: function(response) {
             console.log("Tracks...");
             console.log(response)
@@ -117,11 +124,11 @@
 
             // Check if there are other tracks
             if (response.next !== null) {
+              globalLastRequestTracksRequest = response.next
               requestTracks(response.next, storeSet);
             }
           }
       });
-
     }
 
     function genPlaylistHelper(loc) {
@@ -129,6 +136,12 @@
           url: loc,
           headers: {
             'Authorization': 'Bearer ' + access_token
+          },
+          statusCode: {
+            429: function(response) {
+              console.log("Throttle in genPlaylistHelper!")
+              genPlaylistHelper(globalLastgenPlaylistHelperRequest)
+            }
           },
           success: function(response) {
             console.log("Playlists...");
@@ -139,15 +152,13 @@
               // Request the tracks and put them in songsSet
               requestTracks(item.tracks.href, songsSet);
             }
-            
-            
+
             // Check for more playlists...
             if (response.next !== null) {
               // Spotify imposes a rate limit on API calls. Delay querying the
               // next playlist slightly.
-              setTimeout(function() {
-                genPlaylistHelper(response.next);
-              }, 2000);
+              globalLastgenPlaylistHelperRequest = response.next;
+              genPlaylistHelper(response.next);
             }
           }
       });
@@ -159,10 +170,17 @@
           headers: {
             'Authorization': 'Bearer ' + access_token
           },
+          statusCode: {
+            429: function(response) {
+              console.log("Throttle in genLibraryHelper!")
+              genLibraryHelper(globalLastGenLibraryHelperRequest)
+            }
+          },
           success: function(response) {
             console.log("Tracks...");
+
             console.log(response)
-            
+
             // Get songs from library...
             for (var item of response.items) {
               var trackID = item.track.id;
@@ -173,18 +191,19 @@
 
             // Check for more songs...
             if (response.next !== null) {
-              // Spotify imposes a rate limit on API calls. Delay querying the
-              // next playlist slightly.
-              setTimeout(function() {
-                genLibraryHelper(response.next);
-              }, 2000);
+              // Spotify imposes a rate limit on API calls.
+              // Store the next request so we can query it again if needed.
+              globalLastGenLibraryHelperRequest = response.next;
+
+              // Recursively make next request...
+              genLibraryHelper(response.next);
             }
           }
       });
     }
 
     genPlaylistHelper('https://api.spotify.com/v1/me/playlists')
-    genLibraryHelper('https://api.spotify.com/v1/me/tracks')
+    genLibraryHelper('https://api.spotify.com/v1/me/tracks?limit=50')
   }
 
   var userProfileSource = document.getElementById('user-profile-template').innerHTML,
