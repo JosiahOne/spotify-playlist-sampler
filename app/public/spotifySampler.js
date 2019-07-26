@@ -183,7 +183,7 @@
       });
     }
 
-    //genPlaylistHelper('https://api.spotify.com/v1/me/playlists')
+    genPlaylistHelper('https://api.spotify.com/v1/me/playlists')
     genLibraryHelper('https://api.spotify.com/v1/me/tracks')
   }
 
