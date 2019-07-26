@@ -93,6 +93,11 @@
   function generatePlaylist(access_token) {
     songsSet = new Set([]);
 
+    function updateFoundSongsUI() {
+      // Update songs counter on front-end...
+      document.getElementById("numSongsFound").innerHTML = songsSet.size
+    }
+
     function requestTracks(loc, storeSet) {
       $.ajax({
           url: loc,
@@ -108,8 +113,7 @@
               storeSet.add(item.track.id)
             }
 
-            // Update songs counter on front-end...
-            document.getElementById("numSongsFound").innerHTML = storeSet.size
+            updateFoundSongsUI();
 
             // Check if there are other tracks
             if (response.next !== null) {
@@ -135,6 +139,8 @@
               // Request the tracks and put them in songsSet
               requestTracks(item.tracks.href, songsSet);
             }
+            
+            
             // Check for more playlists...
             if (response.next !== null) {
               // Spotify imposes a rate limit on API calls. Delay querying the
@@ -163,6 +169,8 @@
               songsSet.add(trackID);
             }
 
+            updateFoundSongsUI();
+
             // Check for more songs...
             if (response.next !== null) {
               // Spotify imposes a rate limit on API calls. Delay querying the
@@ -175,7 +183,7 @@
       });
     }
 
-    genPlaylistHelper('https://api.spotify.com/v1/me/playlists')
+    //genPlaylistHelper('https://api.spotify.com/v1/me/playlists')
     genLibraryHelper('https://api.spotify.com/v1/me/tracks')
   }
 
