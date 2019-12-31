@@ -29,8 +29,12 @@
     return hashParams;
   }
 
-  function composePlaylist(access_token, user_id) {
+  function findAlbumPlaylists(access_token, user_id) {
+    // findAlbumPlaylists entrypoint
+    console.log("Testing")
+  }
 
+  function composePlaylist(access_token, user_id) {
     // Note: Only 100 songs can be added at a time.
     function addSongs(playlistID) {
       var chosenSongs = new Set([])
@@ -210,10 +214,6 @@
       userProfileTemplate = Handlebars.compile(userProfileSource),
       userProfilePlaceholder = document.getElementById('user-profile');
 
-  var oauthSource = document.getElementById('oauth-template').innerHTML,
-      oauthTemplate = Handlebars.compile(oauthSource),
-      oauthPlaceholder = document.getElementById('oauth');
-
   var params = getHashParams();
 
   var access_token = params.access_token,
@@ -226,12 +226,6 @@
     alert('There was an error during the authentication');
   } else {
     if (access_token) {
-      // render oauth info
-      oauthPlaceholder.innerHTML = oauthTemplate({
-        access_token: access_token,
-        refresh_token: refresh_token
-      });
-
       $.ajax({
           url: 'https://api.spotify.com/v1/me',
           headers: {
@@ -247,18 +241,24 @@
           }
       });
 
-      generatePlaylist(access_token);
+
+
     } else {
         // render initial screen
         $('#login').show();
         $('#loggedin').hide();
     }
 
-    document.getElementById('obtain-new-token').addEventListener('click', refreshToken, false);
-
-
     document.getElementById("composeButton").addEventListener('click', function() {
-      composePlaylist(access_token, user_id )
+      composePlaylist(access_token, user_id)
+    });
+
+    document.getElementById("albumRenamerButton").addEventListener('click', function() {
+      findAlbumPlaylists(access_token, user_id)
+    });
+
+    document.getElementById("findPlaylistsButton").addEventListener('click', function() {
+      generatePlaylist(access_token)
     });
 
   }
