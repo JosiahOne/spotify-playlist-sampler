@@ -1,7 +1,7 @@
 (function() {
 
   function refreshToken() {
-    $.ajax({
+    /*$.ajax({
       url: '/refresh_token',
       data: {
         'refresh_token': refresh_token
@@ -13,7 +13,7 @@
         refresh_token: refresh_token
       });
     });
-  }
+  }*/
 
   /**
    * Obtains parameters from the hash of the URL
