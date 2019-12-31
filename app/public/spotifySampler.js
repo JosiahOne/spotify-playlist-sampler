@@ -1,7 +1,7 @@
 (function() {
 
-  function refreshToken() {
-    /*$.ajax({
+  /*function refreshToken() {
+    $.ajax({
       url: '/refresh_token',
       data: {
         'refresh_token': refresh_token
