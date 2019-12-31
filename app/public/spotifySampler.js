@@ -55,6 +55,22 @@
       });
     }
 
+    function playlistRenameAction(playlistID, newName) {
+      $.ajax({
+          url: "https://api.spotify.com/v1/playlists/" + playlistID,
+          type: "PUT",
+          data: JSON.stringify({
+            "name": newName
+          }),
+          headers: {
+            'Authorization': 'Bearer ' + access_token
+          },
+          success: function(response) {
+            console.log(response)
+          }
+      });
+    }
+
     // Renames playlists based on the album name.
     // Input:
     //   playlists = [{
@@ -62,7 +78,26 @@
     //     "id": <playlist_id>
     //   }, ...]
     function renamePlaylists(playlists) {
-      
+      for (const playlist of playlists) {
+        $.ajax({
+            url: "https://api.spotify.com/v1/playlists/" + playlist.id + "/tracks",
+            type: "GET",
+            headers: {
+              'Authorization': 'Bearer ' + access_token
+            },
+            success: function(response) {
+              if (response.items.length > 0) {
+                let aTrackAlbumName = response.items[0].track.album.name
+                let aTrackAlbumArtist = response.items[0].track.album.artists[0].name
+                let desiredName = aTrackAlbumArtist + " - " + aTrackAlbumName
+                console.log(desiredName)
+
+                // Edit name
+                playlistRenameAction(playlist.id, desiredName)
+              }
+            }
+        });
+      }
     }
 
     function filterPlaylists(playlists) {
