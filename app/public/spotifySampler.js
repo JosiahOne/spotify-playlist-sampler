@@ -143,7 +143,15 @@
       var songsToAdd = []
       var songsArray = [...songsSet]
 
-      for (var i = 0; i < 100; i++) {
+      var inputNumSongs = document.getElementById("desiredNumSongsField").value
+
+      if (!inputNumSongs || inputNumSongs === "") {
+        inputNumSongs = 100;
+      } else {
+        inputNumSongs = parseInt(inputNumSongs)
+      }
+
+      for (var i = 0; i < inputNumSongs; i++) {
         // Randomly pick a value between 0 and sizeof set - 1
         var randomPos = Math.floor(Math.random() * songsSet.size);
 
@@ -155,21 +163,32 @@
         songsToAdd.push("spotify:track:" + songsArray[randomPos]);
       }
 
-      // Post to new playlist...
-      $.ajax({
-          url: "https://api.spotify.com/v1/playlists/" + playlistID + "/tracks",
-          type: "POST",
-          data: JSON.stringify({
-            "uris": songsToAdd
-          }),
-          headers: {
-            'Authorization': 'Bearer ' + access_token,
-            'Content-Type': "application/json"
-          },
-          success: function(response) {
-            alert("Playlist created and songs added!")
-          }
-      });
+      for (var i = 0; i < songsToAdd.length; i++) {
+        // Post to new playlist...
+        var end = i + 100;
+        if (end > songsToAdd.length) {
+          end = songsToAdd.length
+          i = end
+        }
+
+        $.ajax({
+            url: "https://api.spotify.com/v1/playlists/" + playlistID + "/tracks",
+            type: "POST",
+            data: JSON.stringify({
+              "uris": songsToAdd.slice(i, end)
+            }),
+            headers: {
+              'Authorization': 'Bearer ' + access_token,
+              'Content-Type': "application/json"
+            },
+            success: function(response) {
+              alert("Playlist created and songs added!")
+            }
+        });
+
+        i += 100;
+      }
+
 
     }
 
