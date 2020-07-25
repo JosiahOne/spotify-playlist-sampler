@@ -1,7 +1,7 @@
 FROM ubuntu
 
 # Get dependencies
-RUN apt-get update
+RUN apt-get update -y
 RUN apt-get install -y npm
 
 # Setup workdir
