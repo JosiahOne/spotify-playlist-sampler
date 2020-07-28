@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu:bionic
 
 # Get dependencies
 RUN apt-get update -y
